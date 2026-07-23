@@ -21,20 +21,25 @@ function App() {
   const saveAll = useAppStore((s) => s.saveAll);
   const closeFile = useAppStore((s) => s.closeFile);
   const setActive = useAppStore((s) => s.setActive);
-  const toasts = useAppStore((s) => s.toasts);
-  const dismissToast = useAppStore((s) => s.dismissToast);
 
-  // File-association open: drain cold-start argv, then listen for warm opens
+  // File-association open: register warm-open listener first, then drain cold-start argv
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let disposed = false;
     (async () => {
-      const cold = await invoke<string[]>("take_pending_files");
-      if (cold.length) useAppStore.getState().openFiles(cold);
-      unlisten = await listen<string[]>("open-files", (e) => {
+      const fn = await listen<string[]>("open-files", (e) => {
         if (e.payload.length) useAppStore.getState().openFiles(e.payload);
       });
+      if (disposed) {
+        fn();
+        return;
+      }
+      unlisten = fn;
+      const cold = await invoke<string[]>("take_pending_files");
+      if (cold.length) useAppStore.getState().openFiles(cold);
     })();
     return () => {
+      disposed = true;
       unlisten?.();
     };
   }, []);
@@ -54,28 +59,31 @@ function App() {
       } else if (key === "s" && !e.shiftKey) {
         e.preventDefault();
         if (activeFile) saveFile(activeFile.id);
-      } else if (key === "s" && e.shiftKey) {
+      } else if (key === "s" && e.altKey) {
         e.preventDefault();
         saveAll();
       } else if (key === "w") {
         e.preventDefault();
         if (activeFile) closeFile(activeFile.id);
-      } else if (key === "tab" && e.shiftKey) {
+      } else if (key === "tab" || key === "pagedown" || key === "pageup") {
         e.preventDefault();
         const ids = files.map((f) => f.id);
         if (ids.length < 2 || !activeFile) return;
         const idx = ids.indexOf(activeFile.id);
-        const prev = (idx - 1 + ids.length) % ids.length;
-        setActive(ids[prev]);
+        const backwards = e.shiftKey || key === "pageup";
+        const next = backwards
+          ? (idx - 1 + ids.length) % ids.length
+          : (idx + 1) % ids.length;
+        setActive(ids[next]);
       } else if (key === "1") {
         e.preventDefault();
         setViewMode("single");
       } else if (key === "2") {
         e.preventDefault();
         setViewMode("compare");
-      } else if (key === "d" && e.shiftKey) {
+      } else if (key === "s" && e.shiftKey) {
         e.preventDefault();
-        saveFileAs(activeFile?.id ?? "");
+        if (activeFile) saveFileAs(activeFile.id);
       } else if (key === "t" && e.shiftKey) {
         e.preventDefault();
         setViewMode(viewMode === "single" ? "compare" : "single");
@@ -104,43 +112,45 @@ function App() {
       <ToastStack />
     </div>
   );
+}
 
-  function StatusBar() {
-    const active = useAppStore((s) => getActiveFile(s));
-    if (!active) return <div className="statusbar">Ready</div>;
-    const lines = active.content.split("\n").length;
-    const words = active.content.trim().length === 0 ? 0 : active.content.trim().split(/\s+/).length;
-    const chars = active.content.length;
-    return (
-      <div className="statusbar">
-        <span>{active.name}{active.isDirty ? " •" : ""}</span>
-        <span>{lines} lines</span>
-        <span>{words} words</span>
-        <span>{chars} chars</span>
-        <span className="spacer" />
-        <span>UTF-8</span>
-        <span>Markdown</span>
-      </div>
-    );
-  }
+function StatusBar() {
+  const active = useAppStore((s) => getActiveFile(s));
+  if (!active) return <div className="statusbar">Ready</div>;
+  const lines = active.content.split("\n").length;
+  const words = active.content.trim().length === 0 ? 0 : active.content.trim().split(/\s+/).length;
+  const chars = active.content.length;
+  return (
+    <div className="statusbar">
+      <span>{active.name}{active.isDirty ? " •" : ""}</span>
+      <span>{lines} lines</span>
+      <span>{words} words</span>
+      <span>{chars} chars</span>
+      <span className="spacer" />
+      <span>UTF-8</span>
+      <span>Markdown</span>
+    </div>
+  );
+}
 
-  function ToastStack() {
-    if (toasts.length === 0) return null;
-    return (
-      <div className="toast-stack">
-        {toasts.map((t) => (
-          <div
-            key={t.id}
-            className={"toast" + (t.kind === "error" ? " error" : t.kind === "success" ? " success" : "")}
-            onClick={() => dismissToast(t.id)}
-            role="status"
-          >
-            {t.message}
-          </div>
-        ))}
-      </div>
-    );
-  }
+function ToastStack() {
+  const toasts = useAppStore((s) => s.toasts);
+  const dismissToast = useAppStore((s) => s.dismissToast);
+  if (toasts.length === 0) return null;
+  return (
+    <div className="toast-stack">
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          className={"toast" + (t.kind === "error" ? " error" : t.kind === "success" ? " success" : "")}
+          onClick={() => dismissToast(t.id)}
+          role="status"
+        >
+          {t.message}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default App;

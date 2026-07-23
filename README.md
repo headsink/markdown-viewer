@@ -87,10 +87,11 @@ install it the first time they launch the app.
 | New file                     | `Ctrl+N`                |
 | Open file(s)                 | `Ctrl+O`                |
 | Save                         | `Ctrl+S`                |
-| Save as                      | `Ctrl+Shift+D`          |
-| Save all                     | `Ctrl+Shift+S`          |
+| Save as                      | `Ctrl+Shift+S`          |
+| Save all                     | `Ctrl+Alt+S`            |
 | Close current file           | `Ctrl+W`                |
-| Cycle to previous tab        | `Ctrl+Shift+Tab`        |
+| Next tab                     | `Ctrl+Tab` or `Ctrl+PageDown` |
+| Previous tab                 | `Ctrl+Shift+Tab` or `Ctrl+PageUp` |
 | Single-file view             | `Ctrl+1`                |
 | Compare view                 | `Ctrl+2`                |
 | Toggle view (single/compare) | `Ctrl+Shift+T`          |

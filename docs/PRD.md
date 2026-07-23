@@ -89,8 +89,8 @@ inspection or by reading the diff.
 - **F1.3** The app must save the active file to its original path
   (`Ctrl+S`).
 - **F1.4** The app must support "Save As…" to a new path
-  (`Ctrl+Shift+D`).
-- **F1.5** The app must support "Save All" (`Ctrl+Shift+S`).
+  (`Ctrl+Shift+S`).
+- **F1.5** The app must support "Save All" (`Ctrl+Alt+S`).
 - **F1.6** The app must track per-file dirty state and show a visual
   indicator in the tab.
 - **F1.7** Closing a dirty file must prompt for confirmation.

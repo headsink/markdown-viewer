@@ -5,6 +5,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- Keyboard shortcut cleanup: "Save As" moved to the conventional
+  `Ctrl+Shift+S` (was `Ctrl+Shift+D`); "Save All" moved to
+  `Ctrl+Alt+S`. Added `Ctrl+Tab` / `Ctrl+PageDown` for next tab and
+  `Ctrl+PageUp` for previous tab (previously only previous-tab cycling
+  existed).
+- Hoisted `StatusBar` and `ToastStack` out of the `App` component so
+  they no longer remount on every render.
+
+### Fixed
+
+- File-association warm-open race: the `open-files` event listener is
+  now registered before draining the cold-start argv queue, so a file
+  opened from a second instance during startup can no longer be lost.
+
 ### Added
 
 - Windows file associations for `.md`, `.markdown`, `.mdown`,
