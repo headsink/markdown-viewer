@@ -1,0 +1,6 @@
+[build]
+# Cargo target dir is redirected out of OneDrive because OneDrive's
+# Files On-Demand marks folders as ReadOnly, which breaks Cargo
+# build scripts (autocfg panics with "output path is not a writable
+# directory"). See AGENTS.md for the full explanation.
+target-dir = "C:\\Users\\User\\AppData\\Local\\Temp\\opencode\\markdown-viewer-target"
