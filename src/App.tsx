@@ -56,12 +56,15 @@ function App() {
       } else if (key === "o") {
         e.preventDefault();
         openFile();
-      } else if (key === "s" && !e.shiftKey) {
+      } else if (key === "s" && e.shiftKey && !e.altKey) {
         e.preventDefault();
-        if (activeFile) saveFile(activeFile.id);
-      } else if (key === "s" && e.altKey) {
+        if (activeFile) saveFileAs(activeFile.id);
+      } else if (key === "s" && e.altKey && !e.shiftKey) {
         e.preventDefault();
         saveAll();
+      } else if (key === "s" && !e.shiftKey && !e.altKey) {
+        e.preventDefault();
+        if (activeFile) saveFile(activeFile.id);
       } else if (key === "w") {
         e.preventDefault();
         if (activeFile) closeFile(activeFile.id);
@@ -81,9 +84,6 @@ function App() {
       } else if (key === "2") {
         e.preventDefault();
         setViewMode("compare");
-      } else if (key === "s" && e.shiftKey) {
-        e.preventDefault();
-        if (activeFile) saveFileAs(activeFile.id);
       } else if (key === "t" && e.shiftKey) {
         e.preventDefault();
         setViewMode(viewMode === "single" ? "compare" : "single");
